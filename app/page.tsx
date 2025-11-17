@@ -8,8 +8,8 @@ export default function HomePage() {
 
       {/* NAVBAR */}
        <Navbar />
-
-      {/* HERO */}
+       
+      {/* HERO SECTION */}
       <section className="flex flex-col items-center justify-center text-center mt-32 px-6">
         <h2 className="text-4xl md:text-5xl font-bold max-w-3xl">
           Conecte <span className="text-blue-600">Clientes</span> e{" "}
