@@ -40,7 +40,7 @@ export default function LoginPage() {
       }
 
       // Salvar token no localStorage (por enquanto, até fazermos autenticação completa)
-      localStorage.setItem("token", data.token);
+      document.cookie = `token=${data.token}; path=/;`;
 
       window.location.href = "/dashboard"; // ajuste depois para sua página inicial
     } catch (error) {
