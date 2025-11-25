@@ -120,3 +120,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.sidebar-link {
+  @apply px-3 py-2 rounded-lg hover:bg-gray-100 text-gray-700 font-medium transition;
+}
+

@@ -13,6 +13,8 @@ export default function NewProjectPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [skills, setSkills] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -28,6 +30,11 @@ export default function NewProjectPage() {
           title,
           description,
           budget: Number(budget),
+          deadline,
+          skills: skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -35,8 +42,11 @@ export default function NewProjectPage() {
       );
 
       router.push("/dashboard");
-    } catch (err) {
-      console.error("Erro ao criar projeto:", err);
+    } catch (err: any) {
+      console.error(
+        "Erro ao criar projeto:",
+        err.response?.data || err.message
+      );
     } finally {
       setLoading(false);
     }
@@ -57,6 +67,7 @@ export default function NewProjectPage() {
             onSubmit={handleCreate}
             className="bg-white p-8 rounded-2xl border border-slate-200 shadow-md"
           >
+            {/* TÍTULO */}
             <div className="mb-6">
               <label className="block mb-2 text-sm font-semibold text-slate-700">
                 Título
@@ -71,6 +82,7 @@ export default function NewProjectPage() {
               />
             </div>
 
+            {/* DESCRIÇÃO */}
             <div className="mb-6">
               <label className="block mb-2 text-sm font-semibold text-slate-700">
                 Descrição
@@ -85,17 +97,46 @@ export default function NewProjectPage() {
               />
             </div>
 
-            <div className="mb-8">
+            {/* ORÇAMENTO */}
+            <div className="mb-6">
               <label className="block mb-2 text-sm font-semibold text-slate-700">
                 Orçamento estimado
               </label>
               <input
                 type="number"
                 className="w-full border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:ring-2 focus:ring-slate-900/30 outline-none"
-                placeholder="Ex: 500"
+                placeholder="Ex: 1500"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
                 required
+              />
+            </div>
+
+            {/* DEADLINE */}
+            <div className="mb-6">
+              <label className="block mb-2 text-sm font-semibold text-slate-700">
+                Prazo (deadline)
+              </label>
+              <input
+                type="date"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:ring-2 focus:ring-slate-900/30 outline-none"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* SKILLS */}
+            <div className="mb-8">
+              <label className="block mb-2 text-sm font-semibold text-slate-700">
+                Skills (separe com vírgula)
+              </label>
+              <input
+                type="text"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2 text-slate-800 focus:ring-2 focus:ring-slate-900/30 outline-none"
+                placeholder="Ex: react, node, ux, figma"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
               />
             </div>
 
