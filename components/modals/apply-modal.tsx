@@ -47,15 +47,15 @@ export default function ApplyModal({ open, onClose, projectSkills, onSubmit, pro
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Candidatar-se ao Projeto</DialogTitle>
 
+          {/* O texto simples no DialogDescription */}
           <DialogDescription>
-            <div className="text-sm text-gray-500 -mt-2">
-              Projeto: <span className="font-semibold">{projectName}</span>
-            </div>
-
-            <span className="block">
-              Preencha as informações abaixo para enviar sua candidatura.
-            </span>
+            Preencha as informações abaixo para enviar sua candidatura.
           </DialogDescription>
+
+          {/* Aqui sim divs são permitidas */}
+          <div className="text-sm text-gray-500 -mt-2">
+            Projeto: <span className="font-semibold">{projectName}</span>
+          </div>
         </DialogHeader>
 
 
@@ -108,7 +108,7 @@ export default function ApplyModal({ open, onClose, projectSkills, onSubmit, pro
 
         <DialogFooter className="mt-6 flex justify-end gap-3">
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit}>Enviar candidatura</Button>
+          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 transition text-white">Enviar candidatura</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
