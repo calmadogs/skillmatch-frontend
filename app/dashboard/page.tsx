@@ -1,17 +1,23 @@
   "use client";
 
-  import { useEffect, useState } from "react";
-  import api from "@/lib/api";
-  import { getToken } from "@/lib/auth";
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { getToken } from "@/lib/auth";
+import Link from "next/link";
 
-  import Navbar from "@/components/layout/Navbar";
-  import Sidebar from "@/components/layout/Sidebar";
+import Navbar from "@/components/layout/Navbar";
+import Sidebar from "@/components/layout/Sidebar";
+import { Bell, Eye } from "lucide-react";
 
   interface Project {
     id: number;
     title: string;
     description: string;
     budget: number;
+    applications?: Array<{
+      id: number;
+      status: string;
+    }>;
   }
 
   interface Application {
@@ -70,8 +76,14 @@
 
     if (loading) return <div className="p-10">Carregando...</div>;
 
-    const isClient = user?.role === "CLIENT";
-    const isFrella = user?.role === "FREELA";
+  const isClient = user?.role === "CLIENT";
+  const isFrella = user?.role === "FREELA";
+
+  // Função helper para contar aplicações pendentes
+  const getPendingApplicationsCount = (project: Project) => {
+    if (!project.applications) return 0;
+    return project.applications.filter(app => app.status === "PENDING").length;
+  };
 
     return (
       <div className="min-h-screen">
@@ -99,20 +111,43 @@
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {projects.map((project) => (
-                    <div
-                      key={project.id}
-                      className="p-4 bg-white shadow rounded-xl border hover:shadow-lg transition"
-                    >
-                      <h3 className="font-semibold text-lg">{project.title}</h3>
-                      <p className="text-sm text-slate-500 mt-1">
-                        {project.description.substring(0, 100)}...
-                      </p>
-                      <p className="mt-2 font-medium">
-                        Orçamento: R$ {project.budget}
-                      </p>
-                    </div>
-                  ))}
+                  {projects.map((project) => {
+                    const pendingCount = getPendingApplicationsCount(project);
+                    const hasPendingApplications = pendingCount > 0;
+
+                    return (
+                      <div
+                        key={project.id}
+                        className="p-4 bg-white shadow rounded-xl border hover:shadow-lg transition h-full flex flex-col"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-lg">{project.title}</h3>
+                          {hasPendingApplications && (
+                            <div className="flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
+                              <Bell size={12} />
+                              {pendingCount}
+                            </div>
+                          )}
+                        </div>
+
+                        <p className="text-sm text-slate-500 mt-1 flex-grow">
+                          {project.description ? project.description.substring(0, 100) + (project.description.length > 100 ? '...' : '') : 'Sem descrição disponível'}
+                        </p>
+                        <div className="mt-auto">
+                          <p className="font-medium mb-3">
+                            Orçamento: R$ {project.budget}
+                          </p>
+
+                          <div className="pt-3 border-t border-gray-200">
+                            <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                              <Eye size={14} />
+                              Ver detalhes
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -139,29 +174,42 @@
                   {applications.map((app) => (
                     <div
                       key={app.id}
-                      className="p-4 bg-white shadow rounded-xl border hover:shadow-lg transition"
+                      className="p-4 bg-white shadow rounded-xl border hover:shadow-lg transition h-full flex flex-col"
                     >
-                      <h3 className="font-semibold text-lg">
-                        {app.project.title}
-                      </h3>
-                      <p className="text-sm text-slate-500 mt-1">
-                        Status:{" "}
-                        <span
-                          className={`font-semibold ${
-                            app.status === "APPROVED"
-                              ? "text-green-600"
-                              : app.status === "REJECTED"
-                              ? "text-red-600"
-                              : "text-yellow-600"
-                          }`}
-                        >
-                          {app.status}
-                        </span>
-                      </p>
+                      <div className="flex-grow">
+                        <h3 className="font-semibold text-lg">
+                          {app.project.title}
+                        </h3>
+                        <p className="text-sm text-slate-500 mt-1">
+                          Status:{" "}
+                          <span
+                            className={`font-semibold ${
+                              app.status === "APPROVED"
+                                ? "text-green-600"
+                                : app.status === "REJECTED"
+                                ? "text-red-600"
+                                : "text-yellow-600"
+                            }`}
+                          >
+                            {app.status}
+                          </span>
+                        </p>
+                      </div>
 
-                      <p className="mt-2 font-medium">
-                        Orçamento: R$ {app.project.budget}
-                      </p>
+                      <div className="mt-auto">
+                        <p className="font-medium mb-3">
+                          Orçamento: R$ {app.project.budget}
+                        </p>
+
+                        <div className="pt-3 border-t border-gray-200">
+                          <Link href={`/dashboard/projetos/${app.project.id}`}>
+                            <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
+                              <Eye size={14} />
+                              Ver detalhes
+                            </button>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

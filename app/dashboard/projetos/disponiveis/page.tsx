@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import api from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import Link from "next/link";
-import { Briefcase, Calendar, DollarSign, User, Code } from "lucide-react";
+import { Briefcase, Calendar, DollarSign, User, Code, ChevronLeft } from "lucide-react";
 import { skillIcons } from "@/lib/skill-icons";
 
 export default function ProjetosDisponiveisPage() {
@@ -31,9 +31,16 @@ export default function ProjetosDisponiveisPage() {
 
   return (
     <div className="px-6 py-6">
-      <h1 className="text-3xl font-semibold mb-6 text-slate-800">
-        Projetos Disponíveis
-      </h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Link href="/dashboard">
+          <button className="p-2 rounded-full hover:bg-gray-200 transition">
+            <ChevronLeft size={24} />
+          </button>
+        </Link>
+        <h1 className="text-3xl font-semibold text-slate-800">
+          Projetos Disponíveis
+        </h1>
+      </div>
 
       {projects.length === 0 && (
         <p className="text-slate-500">Nenhum projeto disponível no momento.</p>

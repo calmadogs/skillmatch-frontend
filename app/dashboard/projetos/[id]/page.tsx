@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, CalendarDays, ChevronLeft, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import ApplyModal from "@/components/modals/apply-modal";
 import { getToken } from "@/lib/auth";
 import { useUser } from "@/lib/useUser";
@@ -25,6 +26,9 @@ export default function ProjectDetailsPage() {
     const [error, setError] = useState<string | null>(null);
     const [applyOpen, setApplyOpen] = useState(false);
     const [hasApplied, setHasApplied] = useState(false);
+    const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
+    const [successModalOpen, setSuccessModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         if (!id) return;
@@ -69,6 +73,43 @@ export default function ProjectDetailsPage() {
         checkApplication();
     }, [id, user, project]);
 
+    const handleCancelApplication = async () => {
+        try {
+            const token = getToken();
+            // Primeiro buscar a aplicação do usuário para este projeto
+            const applicationsRes = await api.get(`/applications?freelancerId=${user?.userId}&projectId=${project.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const applications = applicationsRes.data.data || [];
+
+            if (applications.length === 0) {
+                setSuccessMessage("Candidatura não encontrada.");
+                setSuccessModalOpen(true);
+                return;
+            }
+
+            const applicationId = applications[0].id;
+            await api.delete(`/applications/${applicationId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setConfirmCancelOpen(false);
+            setSuccessMessage("Candidatura cancelada com sucesso!");
+            setSuccessModalOpen(true);
+
+            // Recarregar a página após 2 segundos
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+
+        } catch (error) {
+            console.error("Erro ao cancelar candidatura:", error);
+            setConfirmCancelOpen(false);
+            setSuccessMessage("Erro ao cancelar candidatura.");
+            setSuccessModalOpen(true);
+        }
+    };
+
     if (isLoading) return <div className="p-10 text-center">Carregando...</div>;
     if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
     if (!project) return <div className="p-10 text-center">Projeto não encontrado.</div>;
@@ -90,8 +131,9 @@ export default function ProjectDetailsPage() {
 
                         {/* SETA PARA VOLTAR */}
                         <Link href="/dashboard/projetos/disponiveis">
-                            <button className="absolute left-4 top-4 p-2 rounded-full hover:bg-gray-200 transition">
-                                <ChevronLeft size={22} />
+                            <button className="absolute left-4 top-4 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 text-blue-600 transition">
+                                <ChevronLeft size={18} />
+                                <span className="text-sm font-medium">Voltar</span>
                             </button>
                         </Link>
 
@@ -152,12 +194,20 @@ export default function ProjectDetailsPage() {
                                             ✓ Você já se candidatou para este projeto
                                         </p>
                                     </div>
-                                    <Button
-                                        className="w-full bg-gray-600 hover:bg-gray-700 text-white h-12 text-lg font-medium rounded-xl transition"
-                                        onClick={() => window.history.back()}
-                                    >
-                                        Voltar
-                                    </Button>
+                                    <div className="flex gap-3">
+                                        <Button
+                                            className="flex-1 bg-red-600 hover:bg-red-700 text-white h-12 text-lg font-medium rounded-xl transition"
+                                            onClick={() => setConfirmCancelOpen(true)}
+                                        >
+                                            Cancelar candidatura
+                                        </Button>
+                                        <Button
+                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-12 text-lg font-medium rounded-xl transition"
+                                            onClick={() => window.history.back()}
+                                        >
+                                            Voltar
+                                        </Button>
+                                    </div>
                                 </div>
                             ) : (
                                 <Button
@@ -181,7 +231,8 @@ export default function ProjectDetailsPage() {
                                 const token = getToken();
 
                                 if (!user) {
-                                    alert("Erro: usuário não autenticado");
+                                    setSuccessMessage("Erro: usuário não autenticado");
+                                    setSuccessModalOpen(true);
                                     return;
                                 }
 
@@ -192,15 +243,63 @@ export default function ProjectDetailsPage() {
                                 }, {
                                     headers: { Authorization: `Bearer ${token}` },
                                 });
-                                alert("Candidatura enviada com sucesso!");
                                 setApplyOpen(false);
+                                setSuccessMessage("Candidatura enviada com sucesso!");
+                                setSuccessModalOpen(true);
                             } catch (error) {
                                 console.error("Erro ao enviar candidatura:", error);
-                                alert("Erro ao enviar candidatura.");
+                                setSuccessMessage("Erro ao enviar candidatura.");
+                                setSuccessModalOpen(true);
                             }
                         }}
-                        
+
                     />
+
+                    {/* Modal de confirmação de cancelamento */}
+                    <Dialog open={confirmCancelOpen} onOpenChange={setConfirmCancelOpen}>
+                        <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                                <DialogTitle>Confirmar cancelamento</DialogTitle>
+                                <DialogDescription>
+                                    Tem certeza que deseja cancelar sua candidatura para este projeto?
+                                    Esta ação não pode ser desfeita.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setConfirmCancelOpen(false)}
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleCancelApplication}
+                                >
+                                    Confirmar cancelamento
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Modal de sucesso/erro */}
+                    <Dialog open={successModalOpen} onOpenChange={setSuccessModalOpen}>
+                        <DialogContent className="sm:max-w-md">
+                            <DialogHeader>
+                                <DialogTitle>
+                                    {successMessage.includes("sucesso") ? "Sucesso!" : "Atenção"}
+                                </DialogTitle>
+                                <DialogDescription>
+                                    {successMessage}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <Button onClick={() => setSuccessModalOpen(false)}>
+                                    Fechar
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </div>
