@@ -31,6 +31,7 @@ export default function Sidebar() {
   // Menus específicos por tipo de usuário
   const clientLinks = [
     { href: "/dashboard", label: "Dashboard", icon: Home },
+    { href: "/dashboard/candidaturas", label: "Candidaturas", icon: Users },
     { href: "/dashboard/projetos/novoProjeto", label: "Criar projetos", icon: Briefcase },
     { href: "/dashboard/projetos/andamento", label: "Projetos em andamento", icon: ListChecks },
     { href: "/dashboard/profile", label: "Perfil", icon: User },

@@ -7,7 +7,11 @@ import Link from "next/link";
 
 import Navbar from "@/components/layout/Navbar";
 import Sidebar from "@/components/layout/Sidebar";
-import { Bell, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Bell, Eye, Edit, Trash2 } from "lucide-react";
 
   interface Project {
     id: number;
@@ -29,15 +33,49 @@ import { Bell, Eye } from "lucide-react";
     };
   }
 
-  export default function DashboardPage() {
-    const [user, setUser] = useState<any>(null);
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [applications, setApplications] = useState<Application[]>([]);
-    const [loading, setLoading] = useState(true);
+export default function DashboardPage() {
+  const [user, setUser] = useState<any>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projectModalOpen, setProjectModalOpen] = useState(false);
 
-    const token = getToken();
+  const token = getToken();
 
-    useEffect(() => {
+  const handleViewProjectDetails = (project: Project) => {
+    setSelectedProject(project);
+    setProjectModalOpen(true);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!selectedProject) return;
+
+    if (confirm("Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.")) {
+      try {
+        await api.delete(`/projects/${selectedProject.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        // Atualizar a lista de projetos removendo o projeto deletado
+        setProjects(projects.filter(p => p.id !== selectedProject.id));
+        setProjectModalOpen(false);
+        setSelectedProject(null);
+      } catch (error) {
+        console.error("Erro ao deletar projeto:", error);
+        alert("Erro ao deletar projeto.");
+      }
+    }
+  };
+
+  const handleEditProject = () => {
+    if (selectedProject) {
+      // Redirecionar para página de edição
+      window.location.href = `/dashboard/projetos/editar/${selectedProject.id}`;
+    }
+  };
+
+  useEffect(() => {
       if (!token) return;
 
       const loadData = async () => {
@@ -138,12 +176,14 @@ import { Bell, Eye } from "lucide-react";
                             Orçamento: R$ {project.budget}
                           </p>
 
-                          <div className="pt-3 border-t border-gray-200">
+                        <div className="pt-3 border-t border-gray-200">
+                          <Link href="/dashboard/candidaturas">
                             <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
                               <Eye size={14} />
                               Ver detalhes
                             </button>
-                          </div>
+                          </Link>
+                        </div>
                         </div>
                       </div>
                     );
@@ -202,12 +242,13 @@ import { Bell, Eye } from "lucide-react";
                         </p>
 
                         <div className="pt-3 border-t border-gray-200">
-                          <Link href={`/dashboard/projetos/${app.project.id}`}>
-                            <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-                              <Eye size={14} />
-                              Ver detalhes
-                            </button>
-                          </Link>
+                          <button
+                            onClick={() => handleViewProjectDetails(app.project)}
+                            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            <Eye size={14} />
+                            Ver detalhes
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -216,6 +257,62 @@ import { Bell, Eye } from "lucide-react";
               )}
             </section>
           )}
+
+          {/* Modal de detalhes do projeto */}
+          <Dialog open={projectModalOpen} onOpenChange={setProjectModalOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Gerenciar Projeto</DialogTitle>
+                <DialogDescription>
+                  {selectedProject?.title}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                <div className="bg-slate-50 p-4 rounded-lg">
+                  <h4 className="font-semibold mb-2">Informações do Projeto</h4>
+                  <p className="text-sm text-slate-600 mb-2">
+                    {selectedProject?.description}
+                  </p>
+                  <p className="text-sm font-medium">
+                    Orçamento: R$ {selectedProject?.budget}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <Button
+                    onClick={handleEditProject}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Edit size={16} className="mr-2" />
+                    Editar Projeto
+                  </Button>
+
+                  <Button
+                    onClick={handleDeleteProject}
+                    variant="destructive"
+                    className="w-full"
+                  >
+                    <Trash2 size={16} className="mr-2" />
+                    Excluir Projeto
+                  </Button>
+
+                  <Link href="/dashboard/candidaturas">
+                    <Button variant="outline" className="w-full">
+                      <Eye size={16} className="mr-2" />
+                      Ver Candidaturas
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setProjectModalOpen(false)}>
+                  Fechar
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     );
