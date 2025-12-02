@@ -15,10 +15,11 @@ interface ApplyModalProps {
   onClose: () => void;
   projectName: string;
   projectSkills: string[];
+  hasApplied?: boolean;
   onSubmit: (data: any) => void;
 }
 
-export default function ApplyModal({ open, onClose, projectSkills, onSubmit, projectName }: ApplyModalProps) {
+export default function ApplyModal({ open, onClose, projectSkills, onSubmit, projectName, hasApplied = false }: ApplyModalProps) {
   const [description, setDescription] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [extraSkill, setExtraSkill] = useState("");
@@ -45,11 +46,16 @@ export default function ApplyModal({ open, onClose, projectSkills, onSubmit, pro
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-lg rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Candidatar-se ao Projeto</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            {hasApplied ? "Candidatura Já Enviada" : "Candidatar-se ao Projeto"}
+          </DialogTitle>
 
           {/* O texto simples no DialogDescription */}
           <DialogDescription>
-            Preencha as informações abaixo para enviar sua candidatura.
+            {hasApplied
+              ? "Você já enviou uma candidatura para este projeto."
+              : "Preencha as informações abaixo para enviar sua candidatura."
+            }
           </DialogDescription>
 
           {/* Aqui sim divs são permitidas */}
@@ -107,8 +113,14 @@ export default function ApplyModal({ open, onClose, projectSkills, onSubmit, pro
         </div>
 
         <DialogFooter className="mt-6 flex justify-end gap-3">
-          <Button variant="outline" onClick={onClose}>Cancelar</Button>
-          <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 transition text-white">Enviar candidatura</Button>
+          {hasApplied ? (
+            <Button onClick={onClose} className="bg-blue-600 hover:bg-blue-700 transition text-white">Voltar</Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={onClose}>Cancelar</Button>
+              <Button onClick={handleSubmit} className="bg-blue-600 hover:bg-blue-700 transition text-white">Enviar candidatura</Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

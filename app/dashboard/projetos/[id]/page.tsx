@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DollarSign, CalendarDays, ChevronLeft, User } from "lucide-react";
 import ApplyModal from "@/components/modals/apply-modal";
 import { getToken } from "@/lib/auth";
+import { useUser } from "@/lib/useUser";
 
 import Navbar from "@/components/layout/Navbar";
 import Sidebar from "@/components/layout/Sidebar";
@@ -17,11 +18,13 @@ import Sidebar from "@/components/layout/Sidebar";
 export default function ProjectDetailsPage() {
     const params = useParams();
     const id = params.id;
+    const { user } = useUser();
 
     const [project, setProject] = useState<any>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [applyOpen, setApplyOpen] = useState(false);
+    const [hasApplied, setHasApplied] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -43,6 +46,28 @@ export default function ProjectDetailsPage() {
 
         fetchProject();
     }, [id]);
+
+    // Verificar se o usuário já se candidatou (separado para executar quando user estiver disponível)
+    useEffect(() => {
+        if (!id || !project || !user || !user.userId) return;
+
+        const checkApplication = async () => {
+            try {
+                const token = getToken();
+                const applicationsRes = await api.get(`/applications?freelancerId=${user.userId}&projectId=${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const applications = applicationsRes.data.data || [];
+                const hasAppliedCheck = applications.some((app: any) => app.projectId === Number(id));
+                setHasApplied(hasAppliedCheck);
+            } catch (err: any) {
+                console.error("Erro ao verificar candidaturas:", err);
+                setHasApplied(false);
+            }
+        };
+
+        checkApplication();
+    }, [id, user, project]);
 
     if (isLoading) return <div className="p-10 text-center">Carregando...</div>;
     if (error) return <div className="p-10 text-center text-red-500">{error}</div>;
@@ -76,7 +101,7 @@ export default function ProjectDetailsPage() {
                             <div className="flex items-center gap-2 text-gray-700">
                                 <User size={20} className="text-gray-600" />
                                 <span className="font-medium">
-                                    Cliente: {project.clientName || "Não informado"}
+                                    Cliente: {project.creator?.name || "Não informado"}
                                 </span>
                             </div>
 
@@ -120,12 +145,28 @@ export default function ProjectDetailsPage() {
                             </div>
 
                             {/* BOTÃO */}
-                            <Button
-                                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white h-12 text-lg font-medium rounded-xl transition"
-                                onClick={() => setApplyOpen(true)}
-                            >
-                                Candidatar-se
-                            </Button>
+                            {hasApplied ? (
+                                <div className="mt-4 space-y-3">
+                                    <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+                                        <p className="text-green-700 font-medium">
+                                            ✓ Você já se candidatou para este projeto
+                                        </p>
+                                    </div>
+                                    <Button
+                                        className="w-full bg-gray-600 hover:bg-gray-700 text-white h-12 text-lg font-medium rounded-xl transition"
+                                        onClick={() => window.history.back()}
+                                    >
+                                        Voltar
+                                    </Button>
+                                </div>
+                            ) : (
+                                <Button
+                                    className="mt-4 bg-blue-600 hover:bg-blue-700 text-white h-12 text-lg font-medium rounded-xl transition"
+                                    onClick={() => setApplyOpen(true)}
+                                >
+                                    Candidatar-se
+                                </Button>
+                            )}
                         </CardContent>
                     </Card>
 
@@ -134,11 +175,22 @@ export default function ProjectDetailsPage() {
                         onClose={() => setApplyOpen(false)}
                         projectName={project.title}
                         projectSkills={project.skills?.map((s: any) => s.name) || []}
+                        hasApplied={hasApplied}
                         onSubmit={async (formData) => {
                             try {
+                                const token = getToken();
+
+                                if (!user) {
+                                    alert("Erro: usuário não autenticado");
+                                    return;
+                                }
+
                                 await api.post("/applications", {
+                                    freelancerId: user.userId,
                                     projectId: project.id,
                                     ...formData,
+                                }, {
+                                    headers: { Authorization: `Bearer ${token}` },
                                 });
                                 alert("Candidatura enviada com sucesso!");
                                 setApplyOpen(false);

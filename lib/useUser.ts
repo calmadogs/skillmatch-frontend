@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import jwt from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 interface UserPayload {
-  id: string;
-  role: "CLIENT" | "FREELANCER";
-  email: string;
+  userId: number;
+  role: string;
 }
 
 export function useUser() {
@@ -18,7 +17,7 @@ export function useUser() {
     if (!token) return;
 
     try {
-      const decoded = jwt<UserPayload>(token);
+      const decoded = jwtDecode<UserPayload>(token);
       setUser(decoded);
     } catch (err) {
       console.log("Token inválido", err);
