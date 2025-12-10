@@ -216,25 +216,23 @@ export default function DashboardPage() {
                       key={app.id}
                       className="p-4 bg-white shadow rounded-xl border hover:shadow-lg transition h-full flex flex-col"
                     >
-                      <div className="flex-grow">
-                        <h3 className="font-semibold text-lg">
-                          {app.project.title}
-                        </h3>
-                        <p className="text-sm text-slate-500 mt-1">
-                          Status:{" "}
-                          <span
-                            className={`font-semibold ${
-                              app.status === "APPROVED"
-                                ? "text-green-600"
-                                : app.status === "REJECTED"
-                                ? "text-red-600"
-                                : "text-yellow-600"
-                            }`}
-                          >
-                            {app.status}
-                          </span>
-                        </p>
-                      </div>
+                      <h3 className="font-semibold text-lg">
+                        {app.project.title}
+                      </h3>
+                      <p className="text-sm text-slate-500 mt-1">
+                        Status:{" "}
+                        <span
+                          className={`font-semibold ${
+                            app.status === "APPROVED"
+                              ? "text-green-600"
+                              : app.status === "REJECTED"
+                              ? "text-red-600"
+                              : "text-yellow-600"
+                          }`}
+                        >
+                          {app.status}
+                        </span>
+                      </p>
 
                       <div className="mt-auto">
                         <p className="font-medium mb-3">

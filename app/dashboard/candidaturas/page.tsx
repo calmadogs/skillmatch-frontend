@@ -54,14 +54,11 @@ export default function CandidaturasPage() {
       if (!user || !token) return;
 
       try {
-        // Buscar todas as aplicações dos projetos do cliente
         const response = await api.get("/applications", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         const applications: Application[] = response.data.data || [];
-
-        // Agrupar aplicações por projeto
         const projectMap = new Map<number, ProjectWithApplications>();
 
         applications.forEach((app) => {
@@ -114,6 +111,34 @@ export default function CandidaturasPage() {
     }
   };
 
+  const handleUpdateStatus = async (applicationId: number, status: "APPROVED" | "REJECTED") => {
+    if (!token) return;
+
+    try {
+      await api.put(
+        `/applications/${applicationId}`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Atualizar visualmente
+      setProjectsWithApplications((prev) =>
+        prev.map((project) => ({
+          ...project,
+          applications: project.applications.map((app) =>
+            app.id === applicationId ? { ...app, status } : app
+          ),
+        }))
+      );
+
+      if (selectedApplication?.id === applicationId) {
+        setSelectedApplication({ ...selectedApplication, status });
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -133,7 +158,6 @@ export default function CandidaturasPage() {
 
       <main className="ml-0 md:ml-64 pt-20 p-6">
         <div className="max-w-6xl mx-auto">
-          {/* Header com botão voltar */}
           <div className="flex items-center gap-4 mb-6">
             <Link href="/dashboard">
               <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-blue-50 text-blue-600 transition">
@@ -167,10 +191,8 @@ export default function CandidaturasPage() {
                   </CardHeader>
 
                   <CardContent>
-                    <div className="mb-4">
-                      <span className="text-sm font-medium text-slate-600">
-                        {project.applications.length} candidatura{project.applications.length !== 1 ? 's' : ''}
-                      </span>
+                    <div className="mb-4 text-sm font-medium text-slate-600">
+                      {project.applications.length} candidatura{project.applications.length !== 1 ? "s" : ""}
                     </div>
 
                     <div className="space-y-3">
@@ -185,12 +207,8 @@ export default function CandidaturasPage() {
                                 <User size={20} className="text-blue-600" />
                               </div>
                               <div>
-                                <h4 className="font-semibold text-slate-800">
-                                  {application.freelancer.name}
-                                </h4>
-                                <p className="text-sm text-slate-500">
-                                  {application.freelancer.email}
-                                </p>
+                                <h4 className="font-semibold text-slate-800">{application.freelancer.name}</h4>
+                                <p className="text-sm text-slate-500">{application.freelancer.email}</p>
                               </div>
                             </div>
 
@@ -198,43 +216,56 @@ export default function CandidaturasPage() {
                               <Badge className={getStatusColor(application.status)}>
                                 {getStatusText(application.status)}
                               </Badge>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleViewDetails(application)}
-                              >
+                              <Button size="sm" variant="outline" onClick={() => handleViewDetails(application)}>
                                 Ver detalhes
                               </Button>
                             </div>
                           </div>
 
                           {application.description && (
-                            <div className="mb-2">
-                              <p className="text-sm text-slate-600 line-clamp-2">
-                                {application.description}
-                              </p>
-                            </div>
+                            <p className="text-sm text-slate-600 line-clamp-2 mb-2">
+                              {application.description}
+                            </p>
                           )}
 
                           <div className="flex items-center gap-4 text-xs text-slate-500">
                             <span className="flex items-center gap-1">
                               <Calendar size={12} />
-                              {new Date(application.createdAt).toLocaleDateString('pt-BR')}
+                              {new Date(application.createdAt).toLocaleDateString("pt-BR")}
                             </span>
+
                             {application.deadlineAgreement && (
                               <span className="text-green-600">✓ Concorda com prazo</span>
                             )}
                           </div>
 
-                          {application.skills && application.skills.length > 0 && (
+                          {application.skills?.length > 0 && (
                             <div className="mt-2 flex flex-wrap gap-1">
-                              {application.skills.map((skill, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
+                              {application.skills.map((skill, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">
                                   {skill}
                                 </Badge>
                               ))}
                             </div>
                           )}
+
+                          <div className="flex justify-end gap-3 mt-6">
+                            <Button
+                              variant="destructive"
+                              disabled={application.status !== "PENDING"}
+                              onClick={() => handleUpdateStatus(application.id, "REJECTED")}
+                            >
+                              Recusar
+                            </Button>
+
+                            <Button
+                              className="bg-green-600 text-white hover:bg-green-700"
+                              disabled={application.status !== "PENDING"}
+                              onClick={() => handleUpdateStatus(application.id, "APPROVED")}
+                            >
+                              Aceitar
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -246,7 +277,7 @@ export default function CandidaturasPage() {
         </div>
       </main>
 
-      {/* Modal de detalhes da candidatura */}
+      {/* MODAL */}
       <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -273,11 +304,6 @@ export default function CandidaturasPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="text-sm font-medium text-slate-600">Projeto</label>
-                <p className="font-semibold">{selectedApplication.project.title}</p>
-              </div>
-
               {selectedApplication.description && (
                 <div>
                   <label className="text-sm font-medium text-slate-600">Descrição da proposta</label>
@@ -287,7 +313,7 @@ export default function CandidaturasPage() {
                 </div>
               )}
 
-              {selectedApplication.skills && selectedApplication.skills.length > 0 && (
+              {selectedApplication.skills?.length > 0 && (
                 <div>
                   <label className="text-sm font-medium text-slate-600">Skills oferecidas</label>
                   <div className="flex flex-wrap gap-1 mt-1">
@@ -304,12 +330,12 @@ export default function CandidaturasPage() {
                 <div>
                   <label className="text-sm font-medium text-slate-600">Data da candidatura</label>
                   <p className="text-sm">
-                    {new Date(selectedApplication.createdAt).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
+                    {new Date(selectedApplication.createdAt).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </div>
