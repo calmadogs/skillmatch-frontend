@@ -143,11 +143,12 @@ export default function DashboardPage() {
                       <p className="font-medium mb-3">Orçamento: R$ {project.budget}</p>
 
                       <div className="pt-3 border-t">
-                        <Link href="/dashboard/candidaturas">
+                        <Link href={`/dashboard/projetos/${project.id}/candidaturas`}>
                           <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium">
                             <Eye size={14} /> Ver detalhes
                           </button>
                         </Link>
+
                       </div>
                     </div>
                   </div>
@@ -181,13 +182,12 @@ export default function DashboardPage() {
                     <p className="text-sm text-slate-500 mt-1">
                       Status:{" "}
                       <span
-                        className={`font-semibold ${
-                          app.status === "APPROVED"
+                        className={`font-semibold ${app.status === "APPROVED"
                             ? "text-green-600"
                             : app.status === "REJECTED"
-                            ? "text-red-600"
-                            : "text-yellow-600"
-                        }`}
+                              ? "text-red-600"
+                              : "text-yellow-600"
+                          }`}
                       >
                         {app.status}
                       </span>
