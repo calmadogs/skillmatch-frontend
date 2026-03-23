@@ -14,6 +14,7 @@ export default function NewProjectPage() {
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deadline, setDeadline] = useState("");
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +29,7 @@ export default function NewProjectPage() {
           title,
           description,
           budget: Number(budget),
+          deadline,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -95,6 +97,19 @@ export default function NewProjectPage() {
                 placeholder="Ex: 500"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-8">
+              <label className="block mb-2 text-sm font-semibold text-slate-700">
+                Prazo
+              </label>
+              <input
+                type="date"
+                className="w-full border border-slate-300 rounded-lg px-4 py-2"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
                 required
               />
             </div>
