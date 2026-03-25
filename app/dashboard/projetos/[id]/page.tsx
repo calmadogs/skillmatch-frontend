@@ -16,6 +16,8 @@ import { useUser } from "@/lib/useUser";
 import Navbar from "@/components/layout/Navbar";
 import Sidebar from "@/components/layout/Sidebar";
 
+import { useRouter } from "next/navigation";
+
 export default function ProjectDetailsPage() {
     const params = useParams();
     const id = params.id;
@@ -29,6 +31,8 @@ export default function ProjectDetailsPage() {
     const [confirmCancelOpen, setConfirmCancelOpen] = useState(false);
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
+
+    const router = useRouter();
 
     useEffect(() => {
         if (!id) return;
@@ -99,8 +103,8 @@ export default function ProjectDetailsPage() {
 
             // Recarregar a página após 2 segundos
             setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+                router.push("/dashboard/projetos/disponiveis");
+            }, 1500);
 
         } catch (error) {
             console.error("Erro ao cancelar candidatura:", error);
@@ -243,9 +247,13 @@ export default function ProjectDetailsPage() {
                                 }, {
                                     headers: { Authorization: `Bearer ${token}` },
                                 });
+
                                 setApplyOpen(false);
+                                setHasApplied(true);
+
                                 setSuccessMessage("Candidatura enviada com sucesso!");
                                 setSuccessModalOpen(true);
+
                             } catch (error) {
                                 console.error("Erro ao enviar candidatura:", error);
                                 setSuccessMessage("Erro ao enviar candidatura.");

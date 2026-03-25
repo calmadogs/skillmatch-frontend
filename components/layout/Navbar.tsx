@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getToken, logout } from "@/lib/auth";
 import api from "@/lib/api";
 import { LogOut } from "lucide-react";
+import Link from "next/link";
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
@@ -16,7 +17,11 @@ export default function Navbar() {
   const loadUser = async () => {
     try {
       const token = getToken();
-      if (!token) return;
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       const res = await api.get("/me", {
         headers: { Authorization: `Bearer ${token}` },
@@ -25,6 +30,7 @@ export default function Navbar() {
       setUser(res.data);
     } catch (err) {
       console.error("Erro ao carregar usuário:", err);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -37,21 +43,37 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         {loading ? (
           <p className="text-sm text-slate-500">Carregando...</p>
+        ) : user ? (
+          // ✅ USUÁRIO LOGADO
+          <>
+            <p className="text-sm font-medium text-slate-700">
+              {user.name} 
+            </p>
+
+            <button
+              onClick={logout}
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition shadow-sm"
+            >
+              <LogOut size={18} />
+              <span className="text-sm font-medium">Sair</span>
+            </button>
+          </>
         ) : (
-          <p className="text-sm font-medium text-slate-700">{user?.name}</p>
+          // ❌ NÃO LOGADO
+          <>
+            <Link href="/login">
+              <button className="text-sm font-medium text-slate-700 hover:text-blue-600">
+                Login
+              </button>
+            </Link>
+
+            <Link href="/register">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                Registrar
+              </button>
+            </Link>
+          </>
         )}
-
-        <div className="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm">
-          <span>U</span>
-        </div>
-
-        <button
-          onClick={logout}
-          className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition shadow-sm"
-        >
-          <LogOut size={18} />
-          <span className="text-sm font-medium">Sair</span>
-        </button>
       </div>
     </header>
   );
