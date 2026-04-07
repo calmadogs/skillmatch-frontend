@@ -1,6 +1,3 @@
-// CÓDIGO COMPLETO COM MENSAGEM DO FILTRO QUANDO NÃO HÁ RESULTADOS
-// Basta colar este arquivo em sua página Candidaturas
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -219,7 +216,7 @@ export default function CandidaturasPage() {
             </select>
           </div>
 
-          {/* 🔵 MENSAGEM QUANDO NÃO HÁ PROJETOS DO FILTRO */}
+          {/* MENSAGEM QUANDO NÃO HÁ PROJETOS DO FILTRO */}
           {!hasFilteredResults && (
             <div className="text-center py-10 text-slate-500">
               <MessageSquare size={48} className="mx-auto mb-4 text-slate-300" />

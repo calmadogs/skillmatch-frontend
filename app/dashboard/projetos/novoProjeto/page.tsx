@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Sidebar from "@/components/layout/Sidebar";
 import api from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import SkillSelect from "@/components/modals/SkillSelect";
 
 export default function NewProjectPage() {
   const router = useRouter();
@@ -15,6 +16,14 @@ export default function NewProjectPage() {
   const [budget, setBudget] = useState("");
   const [loading, setLoading] = useState(false);
   const [deadline, setDeadline] = useState("");
+  const [extraSkill, setExtraSkill] = useState("");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+
+  const addExtraSkill = () => {
+    if (!extraSkill.trim()) return;
+    setSelectedSkills((prev) => [...prev, extraSkill.trim()]);
+    setExtraSkill("");
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +39,7 @@ export default function NewProjectPage() {
           description,
           budget: Number(budget),
           deadline,
+          skills: selectedSkills,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -42,6 +52,7 @@ export default function NewProjectPage() {
     } finally {
       setLoading(false);
     }
+
   };
 
   return (
@@ -98,6 +109,14 @@ export default function NewProjectPage() {
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
                 required
+              />
+            </div>
+
+            <div className="mt-4 space-y-2">
+              <label className="font-medium text-sm">Skills adicionais (opcional)</label>
+              <SkillSelect
+                selected={selectedSkills}
+                onChange={(value) => setSelectedSkills(value)}
               />
             </div>
 

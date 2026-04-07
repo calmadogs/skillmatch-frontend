@@ -1,14 +1,31 @@
+"use client";
+
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getToken } from "@/lib/auth";
+
 export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = getToken();
+
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, []);
+
+
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900">
 
       {/* NAVBAR */}
-       <Navbar />
-       
+      <Navbar />
+
       {/* HERO SECTION */}
       <section className="flex flex-col items-center justify-center text-center mt-32 px-6">
         <h2 className="text-4xl md:text-5xl font-bold max-w-3xl">

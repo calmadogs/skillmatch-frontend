@@ -16,14 +16,23 @@ interface ApplyModalProps {
   projectName: string;
   projectSkills: string[];
   hasApplied?: boolean;
+  deadline?: string;
   onSubmit: (data: any) => void;
 }
 
-export default function ApplyModal({ open, onClose, projectSkills, onSubmit, projectName, hasApplied = false }: ApplyModalProps) {
+export default function ApplyModal({ open, onClose, projectSkills, onSubmit, projectName, hasApplied = false, deadline }: ApplyModalProps) {
   const [description, setDescription] = useState("");
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [extraSkill, setExtraSkill] = useState("");
   const [deadlineAgreement, setDeadlineAgreement] = useState(false);
+
+  const formattedDeadline = deadline
+    ? new Date(deadline).toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
+    : null;
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills((prev) =>
@@ -103,13 +112,26 @@ export default function ApplyModal({ open, onClose, projectSkills, onSubmit, pro
 
 
         {/* Prazo */}
-        <div className="mt-4 flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={deadlineAgreement}
-            onChange={(e) => setDeadlineAgreement(e.target.checked)}
-          />
-          <label className="text-sm">Estou de acordo com o prazo estipulado no projeto.</label>
+        <div className="mt-4">
+          {formattedDeadline && (
+            <p className="text-xs text-gray-500 mb-2">
+              Prazo do projeto:{" "}
+              <span className="font-medium text-gray-700">
+                {formattedDeadline}
+              </span>
+            </p>
+          )}
+
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={deadlineAgreement}
+              onChange={(e) => setDeadlineAgreement(e.target.checked)}
+            />
+            <label className="text-sm">
+              Estou de acordo com o prazo estipulado no projeto.
+            </label>
+          </div>
         </div>
 
         <DialogFooter className="mt-6 flex justify-end gap-3">

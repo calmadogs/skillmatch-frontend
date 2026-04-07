@@ -184,7 +184,7 @@ export default function ProjectDetailsPage() {
                                             key={skill.id || skill.name}
                                             className="bg-blue-100 text-blue-700 px-3 py-1 text-sm rounded-full"
                                         >
-                                            {skill.name}
+                                            {typeof skill === "string" ? skill : skill.name}
                                         </span>
                                     ))}
                                 </div>
@@ -230,6 +230,7 @@ export default function ProjectDetailsPage() {
                         projectName={project.title}
                         projectSkills={project.skills?.map((s: any) => s.name) || []}
                         hasApplied={hasApplied}
+                        deadline={project.deadline}
                         onSubmit={async (formData) => {
                             try {
                                 const token = getToken();
