@@ -1,36 +1,110 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 SkillMatch Frontend
 
-## Getting Started
+## 📌 Sobre o projeto
 
-First, run the development server:
+O SkillMatch é uma plataforma web que conecta clientes a freelancers, permitindo a criação de projetos, definição de requisitos e candidatura de profissionais de forma prática e eficiente.
+
+Clientes podem criar projetos com orçamento, prazo e habilidades exigidas, enquanto freelancers podem visualizar oportunidades e se candidatar conforme seu perfil.
+
+Este repositório contém o frontend da aplicação, desenvolvido com foco em experiência do usuário, organização e escalabilidade.
+
+---
+
+## 🚀 Tecnologias utilizadas
+
+* Next.js (App Router)
+* React
+* TypeScript
+* Tailwind CSS
+* Axios
+* shadcn/ui
+
+---
+
+## 🎯 Funcionalidades
+
+* Autenticação de usuários (login e registro)
+* Dashboard para clientes e freelancers
+* Criação de projetos com:
+
+  * título
+  * descrição
+  * orçamento
+  * prazo
+  * habilidades exigidas
+* Visualização de projetos disponíveis
+* Sistema de candidatura
+* Cancelamento de candidatura
+* Interface moderna e responsiva
+
+---
+
+## ⚙️ Como rodar o projeto
 
 ```bash
+# Clonar o repositório
+git clone https://github.com/calmadogs/skillmatch-frontend.git
+
+# Entrar na pasta
+cd skillmatch-frontend
+
+# Instalar dependências
+npm install
+
+# Rodar o projeto
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+A aplicação estará disponível em:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3001
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🔐 Autenticação
 
-To learn more about Next.js, take a look at the following resources:
+A autenticação é baseada em token armazenado em cookies.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+O frontend utiliza esse token para acessar rotas protegidas e consumir a API.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📂 Estrutura do projeto
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+app/
+ ├── dashboard/
+ │    ├── candidaturas/
+ │    ├── projetos/
+ │    │    ├── [id]/
+ │    │    ├── disponiveis/
+ │    │    └── novoProjeto/
+ │    └── page.tsx
+ ├── login/
+ ├── register/
+ ├── layout.tsx
+ ├── page.tsx
+ └── globals.css
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+components/
+ ├── layout/
+ ├── ui/
+ └── modals/
+
+lib/
+ ├── api.ts
+ ├── auth.ts
+ ├── middleware.ts
+ ├── queryClient.ts
+ ├── skill-icons.ts
+ ├── skills.ts
+ └── validations/
+```
+
+---
+
+## 📄 Licença
+
+Este projeto é apenas para fins de estudo e portfólio.
